@@ -1,0 +1,184 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><title>lyrics</title>
+<svg width=0 height=0 style=position:absolute><filter id=goo><feGaussianBlur stdDeviation=12 /><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -8"/></filter></svg>
+
+<style>
+:root{--sat:var(--safe-area-inset-top,env(safe-area-inset-top,0px));--sab:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px))}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html{background:#07070d}
+body{background:#07070d;color:#fff;font:15px system-ui,sans-serif;min-height:100vh;padding:calc(16px + var(--sat)) 14px calc(60px + var(--sab))}
+body.lk{overflow:hidden}body.lk #grid .blob{animation-play-state:paused}
+h1{font-weight:800;letter-spacing:-1px;font-size:28px;display:flex;justify-content:space-between;align-items:center}
+h1 small{font-size:12px;font-weight:400;opacity:.5;letter-spacing:0}
+button{font:inherit;color:#fff;background:#fff1;border:1px solid #fff2;border-radius:99px;padding:10px 16px}
+.bar{display:flex;gap:8px;margin:14px 0 8px}
+.bar input{flex:1;min-width:0;padding:13px 16px;border-radius:99px;border:1px solid #fff2;background:#fff1;color:#fff;font:inherit;outline:0}
+.tabs{display:flex;gap:8px}.tabs button.on{background:#fff;color:#000}
+#info{opacity:.5;padding:10px 4px 0;font-size:13px}
+.r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #fff1}
+.r span{min-width:0;flex:1}.r small{opacity:.6;display:block}.r.ok b{opacity:.45}
+.r button{min-width:44px}
+#grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+#empty{opacity:.5;margin-top:18px}
+body.sr #grid,body.sr #empty{display:none!important}
+.card{position:relative;aspect-ratio:3/4;border-radius:26px;overflow:hidden;background:var(--bg);isolation:isolate;animation:in .5s both}
+@keyframes in{from{opacity:0;transform:scale(.94)}}
+.liq{position:absolute;inset:0;z-index:-1;overflow:hidden}
+.liq::after{content:"";position:absolute;inset:0;background:#0003}
+.m{position:absolute;inset:-20%;filter:blur(32px) saturate(1.4);will-change:transform;transform:translateZ(0)}
+.g{position:absolute;inset:0;filter:url(#goo);opacity:.4;will-change:transform;transform:translateZ(0)}
+.blob{position:absolute;width:var(--s);aspect-ratio:1;left:var(--l);top:var(--t);background:var(--c);border-radius:var(--br);will-change:transform;animation:d var(--d) ease-in-out infinite alternate;animation-delay:var(--dl)}
+@keyframes d{to{transform:translate(var(--x),var(--y)) rotate(var(--r)) scale(var(--k))}}
+.off .blob{animation-play-state:paused}
+.t{position:absolute;left:14px;right:14px;bottom:14px;text-shadow:0 2px 14px #0006}
+.t b{display:-webkit-box;font-size:19px;line-height:1.15;letter-spacing:-.3px;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.t i{display:block;font-style:normal;opacity:.8;font-size:13px;margin-top:4px}
+#v{position:fixed;inset:0;z-index:9;display:none;overflow:hidden;background:var(--bg);transition:background .4s}
+#v.on{display:block;animation:fade .3s both}
+@keyframes fade{from{opacity:0}}
+#v .liq{z-index:0}#v .liq::after{background:#0006}
+.sc{position:absolute;inset:0;z-index:1;overflow:auto;-webkit-overflow-scrolling:touch}
+.top{position:sticky;top:0;display:flex;justify-content:space-between;padding:calc(14px + var(--sat)) 14px 14px}
+#v h2{font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.1;padding:8px 22px 0}
+#v p{opacity:.8;padding:6px 22px 22px}
+#v pre{white-space:pre-wrap;font:500 19px/1.75 system-ui,sans-serif;padding:0 22px calc(90px + var(--sab));text-shadow:0 1px 12px #0005}
+</style>
+<h1>lyrics <small><span id=st></span> <button onclick=cfg()>⚙</button></small></h1>
+<div class=bar><input id=q type=text placeholder="song or artist…" autocomplete=off autocapitalize=off autocorrect=off spellcheck=false enterkeyhint=search><button onclick=go()>go</button></div>
+<div class=tabs><button data-m=any class=on>any</button><button data-m=title>title</button><button data-m=artist>artist</button></div>
+<div id=info></div><div id=res></div>
+<p id=empty>empty — search a song or artist</p><div id=grid></div><div id=v></div>
+<script>
+const $=s=>document.querySelector(s),L=localStorage,E=encodeURIComponent;
+let mode='any',S={},db=L.dburl||'',es,found=new Map(),st={},off=0,nq='';
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const H=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
+const RN=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const norm=s=>String(s||'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+const mid=x=>H(norm(x.a)+'|'+norm(x.t)).toString(36);
+const V={
+sad:{w:'cry tears alone lonely goodbye pain hurt miss gone lost broken rain empty fade sorrow tired cold sad die dying grave'.split(' '),p:['#3b4cca','#7a3fc4','#1e88c9','#9a6bff'],bg:'#0a0b22'},
+love:{w:'love kiss baby darling touch hold desire lips heart mine forever together beautiful angel'.split(' '),p:['#ff3d81','#ff8a5c','#c2185b','#ffb3c7'],bg:'#220a18'},
+dark:{w:'fire blood hell kill war dark devil burn hate rage fight demon scream shadow blind night'.split(' '),p:['#ff2e2e','#ff7a18','#8a0f3c','#5b0f9e'],bg:'#120308'},
+happy:{w:'happy sun dance smile shine party fun summer joy sing high alive bright light gold'.split(' '),p:['#ffd23f','#ff7a59','#ff4fa3','#3ddcff'],bg:'#1d1235'},
+calm:{w:'sea ocean river wind sleep dream breathe slow quiet peace moon sky stars blue float soft'.split(' '),p:['#14c9b8','#3a74ff','#8be9c4','#7fd0ff'],bg:'#06161f'}};
+const vibe=t=>{const w=(t.toLowerCase().match(/[a-z']+/g)||[]);let b='sad',m=0;for(const k in V){const s=new Set(V[k].w);const n=w.filter(x=>s.has(x)).length;if(n>m){m=n;b=k}}return b};
+const liq=(id,v)=>{const P=V[v].p,r=RN(H(id));let h='';for(let i=0;i<5;i++){const a=35+r()*30|0,b=35+r()*30|0,c=35+r()*30|0,d=35+r()*30|0;
+h+=`<i class=blob style="--c:${P[i%4]};--s:${40+r()*45}%;--l:${r()*70-10}%;--t:${r()*80-15}%;--x:${r()*80-40}%;--y:${r()*80-40}%;--k:${.7+r()*.8};--r:${r()*160-80}deg;--br:${a}% ${100-a}% ${b}% ${100-b}%/${c}% ${d}% ${100-d}% ${100-c}%;--d:${7+r()*9}s;--dl:-${r()*8}s"></i>`}
+return`<div class=m>${h}</div><div class=g>${h}</div>`};
+const vis=new Set();
+const io=new IntersectionObserver(a=>a.forEach(e=>{const on=e.isIntersecting,l=e.target.querySelector('.liq');e.target.classList.toggle('off',!on);if(l)on?vis.add(l):vis.delete(l)}));
+const render=()=>{const a=Object.entries(S).sort((x,y)=>(y[1].ts||0)-(x[1].ts||0)),g=$('#grid'),ids=new Set(a.map(x=>x[0]));
+[...g.children].forEach(c=>{if(!ids.has(c.dataset.id)){io.unobserve(c);c.remove()}});
+const have={};[...g.children].forEach(c=>have[c.dataset.id]=c);
+a.forEach(([id,d],i)=>{let c=have[id];if(!c){const v=V[d.v]?d.v:'sad';c=document.createElement('div');c.className='card';c.dataset.id=id;c.style.setProperty('--bg',V[v].bg);
+c.innerHTML=`<div class=liq>${liq(id,v)}</div><div class=t><b>${esc(d.title)}</b><i>${esc(d.artist)}</i></div>`;io.observe(c)}
+if(g.children[i]!==c)g.insertBefore(c,g.children[i]||null)});
+$('#empty').style.display=a.length?'none':'block';if(db)L.cache=JSON.stringify(S)};
+const url=p=>`${db}/lyrics${p}.json`;
+const save=async(id,d)=>{S[id]=d;if(db)await fetch(url('/'+id),{method:'PUT',body:JSON.stringify(d)});else L.lyr=JSON.stringify(S);render()};
+const rm=async id=>{delete S[id];if(db)await fetch(url('/'+id),{method:'DELETE'});else L.lyr=JSON.stringify(S);render()};
+const start=()=>{es&&es.close();$('#st').textContent=db?'live':'local';
+S=JSON.parse((db?L.cache:L.lyr)||'{}');render();if(!db)return;
+es=new EventSource(url(''));
+es.addEventListener('put',e=>{const{path,data}=JSON.parse(e.data),p=path.split('/');if(path=='/')S=data||{};else if(p.length==2)data===null?delete S[p[1]]:S[p[1]]=data;render()});
+es.addEventListener('patch',e=>{const{data}=JSON.parse(e.data);for(const k in data)data[k]===null?delete S[k]:S[k]=data[k];render()});
+es.onerror=()=>$('#st').textContent='offline'};
+const cfg=()=>{const u=prompt('Realtime DB URL (Firebase RTDB). Blank = local only',db);if(u===null)return;db=u.trim().replace(/(\.json)?\/*$/,'');L.dburl=db;start()};
+/* search */
+const jc=new Map();
+const J=async(u,sg)=>{if(jc.has(u))return jc.get(u);const r=await fetch(u,{signal:sg});if(!r.ok)throw 0;const d=await r.json();if(jc.size>150)jc.clear();jc.set(u,d);return d};
+const lc=x=>({t:x.trackName,a:x.artistName,l:x.plainLyrics||''});
+const merge=arr=>{for(const x of arr){if(!x||!x.t||!x.a)continue;const k=mid(x),e=found.get(k);if(!e)found.set(k,x);else if(!e.l&&x.l)e.l=x.l}};
+const score=x=>{const t=norm(x.t);return(t==nq?0:t.startsWith(nq)?1:t.includes(nq)||norm(x.a).includes(nq)?2:3)-(x.l?.5:0)};
+const rowH=(k,x)=>{const s=S[k]?'✓':st[k]||'+';return`<div class="r${S[k]?' ok':''}" data-k="${k}"><span><b>${esc(x.t)}</b><small>${esc(x.a)}${x.l?' · lyrics ready':''}</small></span><button>${s}</button></div>`};
+const sorted=()=>[...found].sort((p,q)=>score(p[1])-score(q[1]));
+const show=()=>{const a=sorted();
+$('#info').textContent=a.length+' results';
+$('#res').innerHTML=(a.length?`<div class=r><button id=all>save all</button><button id=more>more</button></div>`:'')+a.map(([k,x])=>rowH(k,x)).join('')};
+let sid=0,ac=null,tm,sp=false,ign=0,cur=null;
+const AP=(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()&&Capacitor.Plugins&&Capacitor.Plugins.App)||null;
+const more=async sg=>{const q=$('#q').value.trim(),f=mode=='artist'?'artist:':mode=='title'?'recording:':'';
+const r=await J('https://musicbrainz.org/ws/2/recording?fmt=json&limit=100&offset='+off+'&query='+E(mode=='any'?q:f+'"'+q+'"'),sg);off+=100;
+return r.recordings.map(x=>({t:x.title,a:(x['artist-credit']||[]).map(c=>c.name).join(', ')}))};
+const clean=s=>s.replace(/\s*[\[].*?[\]]/g,'').replace(/\s+-\s+.*$/,'').trim();
+const getL=async(x,sg)=>{if(x.l)return x.l;const t=clean(x.t),a=x.a.split(/,|&|\sfeat\.?/i)[0].trim();
+try{const d=await J(`https://lrclib.net/api/get?track_name=${E(t)}&artist_name=${E(a)}`,sg);if(d.plainLyrics)return d.plainLyrics}catch{}
+for(const u of [`track_name=${E(t)}&artist_name=${E(a)}`,`q=${E(t+' '+a)}`]){try{const m=(await J('https://lrclib.net/api/search?'+u,sg)).find(y=>y.plainLyrics);if(m)return m.plainLyrics}catch{}}
+return''};
+const row=k=>{const e=document.querySelector(`.r[data-k="${k}"]`),x=found.get(k);e&&x&&e.replaceWith(Object.assign(document.createElement('div'),{innerHTML:rowH(k,x)}).firstChild)};
+const pre=async my=>{const a=sorted().filter(([k,x])=>!x.l&&!x.nf&&!S[k]).slice(0,6);let i=0;
+await Promise.all([0,1,2].map(async()=>{while(i<a.length&&my==sid){const[k,x]=a[i++],l=await getL(x,ac&&ac.signal);if(my!=sid)return;if(l){x.l=l;row(k)}else x.nf=1}}))};
+const run=async full=>{const q=$('#q').value.trim();if(!q)return clearSearch();
+const my=++sid;ac&&ac.abort();ac=new AbortController();const sg=ac.signal;
+found=new Map();st={};off=0;nq=norm(q);
+if(!sp&&!AP){history.pushState({s:1},'');sp=true}
+document.body.classList.add('sr');$('#info').textContent='searching…';
+const at=mode=='title'?'&attribute=songTerm':mode=='artist'?'&attribute=artistTerm':'';
+const T=(p,f)=>p.then(f).then(a=>{if(my==sid){merge(a);show()}}).catch(()=>{});
+const jobs=[T(J('https://itunes.apple.com/search?media=music&entity=song&limit=200&term='+E(q)+at,sg),r=>r.results.map(x=>({t:x.trackName,a:x.artistName}))),
+T(J('https://lrclib.net/api/search?q='+E(q),sg),r=>r.map(lc))];
+if(mode!='artist')jobs.push(T(J('https://lrclib.net/api/search?track_name='+E(q),sg),r=>r.map(lc)));
+if(full)jobs.push(T(more(sg),a=>a));
+await Promise.all(jobs);
+if(my!=sid)return;show();if(!found.size)$('#info').textContent='nothing found';pre(my)};
+const clearSearch=back=>{sid++;ac&&ac.abort();clearTimeout(tm);found=new Map();st={};
+document.body.classList.remove('sr');$('#res').innerHTML='';$('#info').textContent='';
+if(back)sp=false;else if(sp){sp=false;ign++;history.back()}};
+const go=()=>{clearTimeout(tm);$('#q').blur();run(1)};
+const add=async k=>{const x=found.get(k);if(!x||S[k])return;st[k]='…';row(k);const l=await getL(x);
+if(!l){st[k]='✗';row(k);return}
+x.l=l;await save(k,{title:x.t,artist:x.a,lyrics:l.trim(),v:vibe(l),ts:Date.now()});row(k)};
+/* lyrics view */
+const paint=(id,d,saved)=>{const v=V[d.v]?d.v:'sad',o=$('#v');o.style.setProperty('--bg',V[v].bg);
+o.innerHTML=`<div class=liq>${liq(id,v)}</div><div class=sc><div class=top><button onclick=cl()>✕</button><button onclick="${saved?`del('${id}')`:`sv('${id}')`}">${saved?'delete':'save'}</button></div><h2>${esc(d.title)}</h2><p>${esc(d.artist)}</p><pre>${esc(d.lyrics)}</pre></div>`;vis.add(o.querySelector('.liq'))};
+const showO=()=>{$('#v').classList.add('on');document.body.classList.add('lk');AP||history.pushState({v:1},'')};
+const hide=()=>{$('#v').classList.remove('on');document.body.classList.remove('lk');cur=null};
+const cl=()=>{if($('#v').classList.contains('on'))AP?hide():history.back()};
+const open_=id=>{cur=id;paint(id,S[id],1);showO()};
+const view=async k=>{const x=found.get(k);if(!x)return;cur=k;
+if(S[k]){paint(k,S[k],1);showO();return}
+if(x.l){paint(k,{title:x.t,artist:x.a,lyrics:x.l,v:vibe(x.l)},0);showO();return}
+const o=$('#v');o.style.setProperty('--bg',V.sad.bg);
+o.innerHTML=`<div class=sc><div class=top><button onclick=cl()>✕</button><span></span></div><h2>${esc(x.t)}</h2><p>${esc(x.a)}</p><pre>loading…</pre></div>`;showO();
+const l=await getL(x);if(cur!==k||!o.classList.contains('on'))return;
+if(l){x.l=l;row(k);paint(k,{title:x.t,artist:x.a,lyrics:l,v:vibe(l)},0)}else{x.nf=1;o.querySelector('pre').textContent='no lyrics found'}};
+const sv=async id=>{const x=found.get(id);if(!x||!x.l)return;
+await save(id,{title:x.t,artist:x.a,lyrics:x.l.trim(),v:vibe(x.l),ts:Date.now()});
+const b=document.querySelector('#v .top button:last-child');if(b&&cur==id){b.textContent='delete';b.onclick=()=>del(id)}row(id)};
+const del=id=>{if(confirm('delete?')){cl();rm(id).then(()=>row(id))}};
+window.addEventListener('popstate',()=>{if(ign){ign--;return}
+if($('#v').classList.contains('on')){hide();return}
+if(sp){$('#q').value='';clearSearch(1)}});
+const back=()=>{if($('#v').classList.contains('on')){hide();return 1}
+if(document.body.classList.contains('sr')||$('#q').value){$('#q').value='';$('#q').blur();clearSearch();return 1}return 0};
+AP&&AP.addListener('backButton',()=>{back()||AP.exitApp()});
+$('#grid').onclick=e=>{const c=e.target.closest('.card');c&&open_(c.dataset.id)};
+$('#res').onclick=async e=>{
+if(e.target.id=='all'){const q=[...found.keys()].filter(k=>!S[k]&&st[k]!='✗');let i=0;await Promise.all([0,1,2].map(async()=>{while(i<q.length)await add(q[i++])}));return}
+if(e.target.id=='more'){const b=e.target,my=sid;b.textContent='…';try{const a=await more();if(my==sid){merge(a);show()}}catch{b.textContent='more'}return}
+const r=e.target.closest('.r[data-k]');if(!r)return;
+e.target.closest('button')?add(r.dataset.k):view(r.dataset.k)};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x==b));if($('#q').value.trim())run(0)});
+$('#q').addEventListener('input',()=>{clearTimeout(tm);if(!$('#q').value.trim()){clearSearch();return}tm=setTimeout(()=>run(0),200)});
+$('#q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}});
+/* gravity: liquid follows phone tilt */
+const gr={x:0,y:0,px:0,py:0,vx:0,vy:0},amp=new WeakMap(),clamp=v=>Math.max(-1,Math.min(1,v));
+const onMotion=e=>{const a=e.accelerationIncludingGravity;if(!a||a.x==null||a.y==null)return;
+const r=(screen.orientation&&screen.orientation.angle)||window.orientation||0;
+let x=-a.x,y=a.y;
+if(r==90){x=a.y;y=a.x}else if(r==270||r==-90){x=-a.y;y=-a.x}else if(r==180){x=a.x;y=-a.y}
+gr.x=clamp(x/9.81*1.5);gr.y=clamp((y/9.81-.75)*2.5)};
+window.addEventListener('devicemotion',onMotion);
+document.addEventListener('click',()=>{const D=window.DeviceMotionEvent;D&&D.requestPermission&&D.requestPermission().catch(()=>{})},{once:true});
+const tick=()=>{requestAnimationFrame(tick);if(document.hidden)return;
+gr.vx+=(gr.x-gr.px)*.05;gr.vy+=(gr.y-gr.py)*.05;gr.vx*=.9;gr.vy*=.9;gr.px+=gr.vx;gr.py+=gr.vy;
+const lk=document.body.classList.contains('lk');
+for(const l of vis){if(!l.isConnected){vis.delete(l);continue}
+if(lk&&!l.closest('#v'))continue;
+let k=amp.get(l);if(k==null){k=l.offsetWidth*.16;amp.set(l,k)}
+const a=+(gr.px*k).toFixed(1),b=+(gr.py*k).toFixed(1);
+l.children[0].style.transform=`translate3d(${a}px,${b}px,0)`;
+l.children[1].style.transform=`translate3d(${a/2}px,${b/2}px,0)`}};
+requestAnimationFrame(tick);
+start();
+</script>

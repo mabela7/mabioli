@@ -1,6 +1,14 @@
 {
-  "appId": "com.mabela.lyrics",
+  "appId": "com.mabela1.lyrics",
   "appName": "Lyrics",
   "webDir": "www",
-  "backgroundColor": "#07070d"
+  "backgroundColor": "#07070d",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#07070d",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    }
+  }
 }

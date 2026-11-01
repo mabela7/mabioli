@@ -38,7 +38,7 @@ jobs:
         with:
           python-version: "3.12"
 
-            - name: App icon (icon.png / icon.jpg / icon.jpeg)
+      - name: App icon (icon.png / icon.jpg / icon.jpeg)
         run: |
           f=$(ls icon.png icon.jpg icon.jpeg 2>/dev/null | head -n1)
           [ -n "$f" ] || { echo "no icon, default icon"; exit 0; }

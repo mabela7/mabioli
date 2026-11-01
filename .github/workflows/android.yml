@@ -38,14 +38,15 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: App icon (uses icon.png if present)
+            - name: App icon (icon.png / icon.jpg / icon.jpeg)
         run: |
-          [ -f icon.png ] || { echo "no icon.png, default icon"; exit 0; }
+          f=$(ls icon.png icon.jpg icon.jpeg 2>/dev/null | head -n1)
+          [ -n "$f" ] || { echo "no icon, default icon"; exit 0; }
           pip install pillow
-          python3 - <<'EOF'
+          ICON="$f" python3 - <<'EOF'
+          import os, shutil
           from PIL import Image, ImageDraw
-          import shutil
-          src = Image.open('icon.png').convert('RGBA')
+          src = Image.open(os.environ['ICON']).convert('RGBA')
           w, h = src.size
           s = min(w, h)
           x, y = (w - s) // 2, (h - s) // 2
